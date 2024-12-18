@@ -1,0 +1,10 @@
+---
+- name: deploy application to QA-servers
+  hosts: all
+  tasks:
+    - name: create containers
+      docker_container:
+        name: myapp
+        image: bajikareem123/end-to-end
+        ports:
+          - 8080:8080
