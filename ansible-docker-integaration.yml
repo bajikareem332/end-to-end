@@ -1,0 +1,18 @@
+---
+- name: Integrate ansible with docker
+  hosts: all
+  tasks:
+    - name: install docker
+      shell: "{{item}}"
+      with_items:
+        - curl -fsSL https://get.docker.com -o install-docker.sh
+        - sudo sh install-docker.sh
+    - name: install pip3
+      apt:
+        name: python3-pip
+        state: present
+        update_cache: yes
+    - name: integrate docker
+      apt:
+        name: python3-docker
+...          
