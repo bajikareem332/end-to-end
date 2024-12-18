@@ -1,0 +1,69 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage(' clean workspace')
+        {
+            steps
+            {
+                cleanWs deleteDirs: true
+            }
+        }
+        stage('cont download')
+        {
+            steps
+            {
+                git 'https://github.com/bajikareem332/maven.git'
+            }
+        }
+        stage('cont build')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+        }
+         stage('copy artifact into project workspace')
+        {
+            steps
+            {
+                sh 'cp /var/lib/jenkins/workspace/end-end/webapp/target/webapp.war /var/lib/jenkins/workspace/end-end'
+            }
+        }
+        stage('dockerfile')
+        {
+            steps
+            {
+                sh '''cat > Dockerfile<<EOF
+
+FROM tomee
+COPY *.war /usr/local/tomee/webapps/testapp.war
+
+EOF'''
+            }
+        }
+        stage('build docker image')
+        {
+            steps
+            {
+                sh 'docker build -t bajikareem123/end-to-end .'
+            }
+        }
+         stage('Push docker image to docker hub')
+        {
+            steps
+            {
+                sh 'docker push  bajikareem123/end-to-end'
+            }
+        }
+        stage('deploy to QA')
+        {
+            steps
+            {
+                sh 'ssh ubuntu@172.31.29.235 ansible-playbook /home/ubuntu/end-to-end.yml -b'
+            }
+        }
+        
+    }
+}
